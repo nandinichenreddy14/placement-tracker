@@ -9,8 +9,36 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
+  id        String    @id @default(uuid())
+  email     String    @unique
   password  String
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
+  problems  Problem[]
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum ProblemStatus {
+  SOLVED
+  REVISIT
+}
+
+model Problem {
+  id         String        @id @default(uuid())
+  title      String
+  platform   String
+  difficulty Difficulty
+  topic      String
+  status     ProblemStatus
+  link       String?
+  notes      String?
+  date       DateTime      @default(now())
+  userId     String
+  user       User          @relation(fields: [userId], references: [id])
+
+  @@index([userId])
 }
