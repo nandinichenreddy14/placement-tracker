@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Search, Plus, MoreHorizontal, ExternalLink, Code2 } from "lucide-react";
 import { toast } from "sonner";
 import api from "../api/client.js";
+import { getErrorMessage } from "../lib/errors.js";
 import PageHeader from "../components/PageHeader.jsx";
 import EmptyState from "../components/EmptyState.jsx";
 import DifficultyBadge from "../components/DifficultyBadge.jsx";
@@ -96,7 +97,7 @@ function ProblemsPage() {
       }
       await fetchProblems();
     } catch (err) {
-      toast.error(err.response?.data?.error || "Failed to save problem");
+      toast.error(getErrorMessage(err, "Failed to save problem"));
       throw err;
     }
   }
@@ -107,7 +108,7 @@ function ProblemsPage() {
       setProblems((prev) => prev.filter((p) => p.id !== id));
       toast.success("Problem deleted");
     } catch (err) {
-      toast.error(err.response?.data?.error || "Failed to delete problem");
+      toast.error(getErrorMessage(err, "Failed to delete problem"));
     }
   }
 

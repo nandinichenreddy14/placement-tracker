@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
+import { getErrorMessage } from "../lib/errors.js";
 import AuthSplitLayout from "../components/AuthSplitLayout.jsx";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,7 +23,7 @@ function SignupPage() {
       await signup(email, password);
       navigate("/dashboard");
     } catch (err) {
-      setError(err.response?.data?.error || "Signup failed");
+      setError(getErrorMessage(err, "Signup failed"));
     } finally {
       setSubmitting(false);
     }

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Plus, Building2 } from "lucide-react";
 import { toast } from "sonner";
 import api from "../api/client.js";
+import { getErrorMessage } from "../lib/errors.js";
 import PageHeader from "../components/PageHeader.jsx";
 import EmptyState from "../components/EmptyState.jsx";
 import CompanyFormDialog from "../components/CompanyFormDialog.jsx";
@@ -57,7 +58,7 @@ function CompaniesPage() {
       }
       await fetchCompanies();
     } catch (err) {
-      toast.error(err.response?.data?.error || "Failed to save company");
+      toast.error(getErrorMessage(err, "Failed to save company"));
       throw err;
     }
   }
@@ -68,7 +69,7 @@ function CompaniesPage() {
       setCompanies((prev) => prev.filter((c) => c.id !== id));
       toast.success("Company deleted");
     } catch (err) {
-      toast.error(err.response?.data?.error || "Failed to delete company");
+      toast.error(getErrorMessage(err, "Failed to delete company"));
     }
   }
 
