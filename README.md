@@ -2,7 +2,7 @@
 
 A full-stack web app for tracking coding-interview prep: the problems you've solved, the companies you're targeting, and how it's all adding up — in one dashboard.
 
-**Live demo:** https://placement-tracker-bvr2t7ask-nandinichenreddy14-7377.vercel.app
+**Live demo:** https://placement-tracker-uypz.vercel.app
 
 ## Features
 
