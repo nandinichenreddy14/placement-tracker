@@ -25,35 +25,43 @@ function LoginPage() {
   }
 
   return (
-    <div className="page">
-      <h1>Log in</h1>
-      <form className="form" onSubmit={handleSubmit}>
-        <label>
-          Email
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </label>
-        <label>
-          Password
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </label>
-        {error && <p className="error-text">{error}</p>}
-        <button type="submit" disabled={submitting}>
-          {submitting ? "Logging in..." : "Log in"}
-        </button>
-      </form>
-      <p>
-        Need an account? <Link to="/signup">Sign up</Link>
-      </p>
+    <div className="auth-page">
+      <div className="auth-card">
+        <div className="auth-brand">
+          <span className="auth-logo">P</span>
+          <span className="auth-brand-name">Placement Prep Tracker</span>
+        </div>
+        <p className="auth-tagline">Track your prep. Land the offer.</p>
+
+        <h1>Welcome back</h1>
+        <form className="form" onSubmit={handleSubmit}>
+          <label>
+            Email
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </label>
+          <label>
+            Password
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </label>
+          {error && <p className="error-text">{error}</p>}
+          <button type="submit" disabled={submitting}>
+            {submitting ? "Logging in..." : "Log in"}
+          </button>
+        </form>
+        <p className="auth-footer">
+          Need an account? <Link to="/signup">Sign up</Link>
+        </p>
+      </div>
     </div>
   );
 }
