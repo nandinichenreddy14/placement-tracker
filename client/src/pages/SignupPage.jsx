@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
+import AuthSplitLayout from "../components/AuthSplitLayout.jsx";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 function SignupPage() {
   const { signup } = useAuth();
@@ -25,45 +29,50 @@ function SignupPage() {
   }
 
   return (
-    <div className="auth-page">
-      <div className="auth-card">
-        <div className="auth-brand">
-          <span className="auth-logo">P</span>
-          <span className="auth-brand-name">Placement Prep Tracker</span>
-        </div>
-        <p className="auth-tagline">Track your prep. Land the offer.</p>
+    <AuthSplitLayout>
+      <h1 className="text-2xl font-bold tracking-tight text-foreground">Create your account</h1>
+      <p className="mt-1 text-sm text-muted-foreground">
+        Start tracking your placement prep today.
+      </p>
 
-        <h1>Create your account</h1>
-        <form className="form" onSubmit={handleSubmit}>
-          <label>
-            Email
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </label>
-          <label>
-            Password
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-            />
-          </label>
-          {error && <p className="error-text">{error}</p>}
-          <button type="submit" disabled={submitting}>
-            {submitting ? "Signing up..." : "Sign up"}
-          </button>
-        </form>
-        <p className="auth-footer">
-          Already have an account? <Link to="/login">Log in</Link>
-        </p>
-      </div>
-    </div>
+      <form className="mt-8 space-y-4" onSubmit={handleSubmit}>
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            type="email"
+            className="h-10"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="password">Password</Label>
+          <Input
+            id="password"
+            type="password"
+            className="h-10"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            minLength={6}
+          />
+          <p className="text-xs text-muted-foreground">At least 6 characters.</p>
+        </div>
+        {error && <p className="text-sm text-destructive">{error}</p>}
+        <Button type="submit" className="h-10 w-full" disabled={submitting}>
+          {submitting ? "Signing up..." : "Sign up"}
+        </Button>
+      </form>
+
+      <p className="mt-6 text-center text-sm text-muted-foreground">
+        Already have an account?{" "}
+        <Link to="/login" className="font-medium text-primary hover:underline">
+          Log in
+        </Link>
+      </p>
+    </AuthSplitLayout>
   );
 }
 

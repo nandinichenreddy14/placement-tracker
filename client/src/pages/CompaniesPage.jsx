@@ -1,23 +1,28 @@
 import { useEffect, useState } from "react";
+import { Plus, Building2 } from "lucide-react";
+import { toast } from "sonner";
 import api from "../api/client.js";
-import CompanyForm from "../components/CompanyForm.jsx";
-import CompanyCard from "../components/CompanyCard.jsx";
+import PageHeader from "../components/PageHeader.jsx";
+import EmptyState from "../components/EmptyState.jsx";
+import CompanyFormDialog from "../components/CompanyFormDialog.jsx";
+import CompanyKanbanCard from "../components/CompanyKanbanCard.jsx";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { STATUS_ORDER, STATUS_STYLES } from "@/lib/colors.js";
 
 function CompaniesPage() {
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [showForm, setShowForm] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [editingCompany, setEditingCompany] = useState(null);
+  const [defaultStatus, setDefaultStatus] = useState("WISHLIST");
 
   async function fetchCompanies() {
     setLoading(true);
     setError("");
     try {
-      const params = {};
-      if (statusFilter) params.status = statusFilter;
-      const res = await api.get("/companies", { params });
+      const res = await api.get("/companies");
       setCompanies(res.data);
     } catch {
       setError("Failed to load companies");
@@ -28,79 +33,131 @@ function CompaniesPage() {
 
   useEffect(() => {
     fetchCompanies();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [statusFilter]);
+  }, []);
 
-  function openCreateForm() {
+  function openCreate(status) {
     setEditingCompany(null);
-    setShowForm(true);
+    setDefaultStatus(status || "WISHLIST");
+    setDialogOpen(true);
   }
 
-  function openEditForm(company) {
+  function openEdit(company) {
     setEditingCompany(company);
-    setShowForm(true);
-  }
-
-  function closeForm() {
-    setShowForm(false);
-    setEditingCompany(null);
+    setDialogOpen(true);
   }
 
   async function handleSubmit(data) {
-    if (editingCompany) {
-      await api.put(`/companies/${editingCompany.id}`, data);
-    } else {
-      await api.post("/companies", data);
+    try {
+      if (editingCompany) {
+        await api.put(`/companies/${editingCompany.id}`, data);
+        toast.success("Company updated");
+      } else {
+        await api.post("/companies", data);
+        toast.success("Company added");
+      }
+      await fetchCompanies();
+    } catch (err) {
+      toast.error(err.response?.data?.error || "Failed to save company");
+      throw err;
     }
-    closeForm();
-    await fetchCompanies();
   }
 
   async function handleDelete(id) {
-    await api.delete(`/companies/${id}`);
-    setCompanies((prev) => prev.filter((c) => c.id !== id));
+    try {
+      await api.delete(`/companies/${id}`);
+      setCompanies((prev) => prev.filter((c) => c.id !== id));
+      toast.success("Company deleted");
+    } catch (err) {
+      toast.error(err.response?.data?.error || "Failed to delete company");
+    }
   }
 
   return (
-    <div className="page">
-      <h1>Companies</h1>
+    <div>
+      <PageHeader
+        title="Companies"
+        description="Your target companies, organized by stage."
+        action={
+          <Button onClick={() => openCreate()} className="gap-2">
+            <Plus className="h-4 w-4" />
+            Add Company
+          </Button>
+        }
+      />
 
-      <div className="filters">
-        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-          <option value="">All statuses</option>
-          <option value="WISHLIST">WISHLIST</option>
-          <option value="APPLIED">APPLIED</option>
-          <option value="OA">OA</option>
-          <option value="INTERVIEW">INTERVIEW</option>
-          <option value="OFFER">OFFER</option>
-          <option value="REJECTED">REJECTED</option>
-        </select>
-        <button type="button" onClick={openCreateForm}>
-          Add Company
-        </button>
-      </div>
+      {error && <p className="text-sm text-destructive">{error}</p>}
 
-      {showForm && (
-        <CompanyForm
-          key={editingCompany?.id || "new"}
-          initialValues={editingCompany}
-          onSubmit={handleSubmit}
-          onCancel={closeForm}
+      {loading && (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Skeleton key={i} className="h-40 rounded-xl" />
+          ))}
+        </div>
+      )}
+
+      {!loading && !error && companies.length === 0 && (
+        <EmptyState
+          icon={Building2}
+          title="No companies yet"
+          description="Add the companies you're targeting to track your application pipeline."
+          actionLabel="Add your first company"
+          onAction={() => openCreate()}
         />
       )}
 
-      {loading && <p>Loading...</p>}
-      {error && <p className="error-text">{error}</p>}
-      {!loading && !error && companies.length === 0 && <p>No companies yet.</p>}
+      {!loading && !error && companies.length > 0 && (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+          {STATUS_ORDER.map((status) => {
+            const style = STATUS_STYLES[status];
+            const columnCompanies = companies.filter((c) => c.status === status);
+            return (
+              <div key={status} className="flex flex-col">
+                <div className="mb-3 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className={`h-2 w-2 rounded-full ${style.dot}`} />
+                    <span className="text-sm font-semibold text-foreground">{style.label}</span>
+                    <span className="rounded-full bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
+                      {columnCompanies.length}
+                    </span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 text-muted-foreground"
+                    onClick={() => openCreate(status)}
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+                <div className="flex-1 space-y-3 rounded-xl bg-muted/40 p-2 min-h-24">
+                  {columnCompanies.length === 0 ? (
+                    <p className="px-2 py-4 text-center text-xs text-muted-foreground">
+                      No companies
+                    </p>
+                  ) : (
+                    columnCompanies.map((company) => (
+                      <CompanyKanbanCard
+                        key={company.id}
+                        company={company}
+                        onEdit={openEdit}
+                        onDelete={handleDelete}
+                      />
+                    ))
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
-      {companies.map((company) => (
-        <CompanyCard
-          key={company.id}
-          company={company}
-          onEdit={openEditForm}
-          onDelete={handleDelete}
-        />
-      ))}
+      <CompanyFormDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        initialValues={editingCompany}
+        defaultStatus={defaultStatus}
+        onSubmit={handleSubmit}
+      />
     </div>
   );
 }
