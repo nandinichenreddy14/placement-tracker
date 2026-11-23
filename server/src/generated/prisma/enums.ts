@@ -24,3 +24,15 @@ export const ProblemStatus = {
 } as const
 
 export type ProblemStatus = (typeof ProblemStatus)[keyof typeof ProblemStatus]
+
+
+export const CompanyStatus = {
+  WISHLIST: 'WISHLIST',
+  APPLIED: 'APPLIED',
+  OA: 'OA',
+  INTERVIEW: 'INTERVIEW',
+  OFFER: 'OFFER',
+  REJECTED: 'REJECTED'
+} as const
+
+export type CompanyStatus = (typeof CompanyStatus)[keyof typeof CompanyStatus]

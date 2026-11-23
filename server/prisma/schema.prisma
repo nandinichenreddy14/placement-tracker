@@ -14,6 +14,7 @@ model User {
   password  String
   createdAt DateTime  @default(now())
   problems  Problem[]
+  companies Company[]
 }
 
 enum Difficulty {
@@ -39,6 +40,28 @@ model Problem {
   date       DateTime      @default(now())
   userId     String
   user       User          @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+enum CompanyStatus {
+  WISHLIST
+  APPLIED
+  OA
+  INTERVIEW
+  OFFER
+  REJECTED
+}
+
+model Company {
+  id            String        @id @default(uuid())
+  name          String
+  role          String
+  status        CompanyStatus
+  interviewDate DateTime?
+  notes         String?
+  userId        String
+  user          User          @relation(fields: [userId], references: [id])
 
   @@index([userId])
 }
